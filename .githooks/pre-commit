@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# === BlackFox AI Refs — pre-commit Guard ===
+# Blockt alles, was kein Shop-/Public-Bild unter refs/<kunde>/ ist.
+# Aktivieren: ./setup-hooks.sh  (setzt core.hooksPath auf .githooks)
+
+set -euo pipefail
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+
+fail=0
+err() { echo "  ✗ $1"; fail=1; }
+
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
+
+  # Erlaubte Struktur-Dateien
+  case "$f" in
+    README.md|.gitignore|setup-hooks.sh|.githooks/*) continue ;;
+  esac
+
+  # Muss unter refs/<kunde>/ liegen
+  if [[ "$f" != refs/*/* ]]; then
+    err "$f — liegt nicht unter refs/<kunde>/"; continue
+  fi
+
+  # Muss ein erlaubtes Bildformat sein
+  if [[ ! "$f" =~ \.(png|jpg|jpeg|webp|PNG|JPG|JPEG|WEBP)$ ]]; then
+    err "$f — nur .png/.jpg/.jpeg/.webp erlaubt (keine Videos, Docs, Configs)"; continue
+  fi
+
+  # Generierte / interne Marker → verboten (gehören in Track 2 / R2)
+  base=$(basename "$f")
+  low=$(echo "$f" | tr '[:upper:]' '[:lower:]')
+  if [[ "$low" == *frames* || "$low" == *storyboard* || "$low" == *moodboard* \
+     || "$low" == *mood-board* || "$low" == *draft* || "$low" == *wip* \
+     || "$base" == beat* ]]; then
+    err "$f — sieht nach generiertem/internem Asset aus (frames/storyboard/beat/draft/wip)"
+  fi
+done <<< "$staged"
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "BLOCKIERT: Dieses Repo ist PUBLIC — nur ohnehin-öffentliche Shop-Bilder."
+  echo "Generierte/interne Assets gehören in Track 2 (R2: refs.blackfox-marketing.de)."
+  echo "Override (bewusst!): git commit --no-verify"
+  exit 1
+fi
+exit 0

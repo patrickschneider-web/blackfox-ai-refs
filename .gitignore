@@ -1,0 +1,39 @@
+# === BlackFox AI Refs — Allowlist-Gitignore ===
+# Dieses Repo ist PUBLIC. Es dürfen NUR Shop-/Public-Bilder rein.
+# Strategie: erst alles ignorieren, dann gezielt Shop-Bilder freigeben.
+
+# 1) Alles ignorieren
+*
+
+# 2) Struktur-Dateien freigeben
+!.gitignore
+!README.md
+!.githooks/
+!.githooks/*
+!setup-hooks.sh
+
+# 3) refs/-Baum + Shop-Bilder freigeben
+!refs/
+!refs/**/
+!refs/**/*.png
+!refs/**/*.jpg
+!refs/**/*.jpeg
+!refs/**/*.webp
+
+# 4) Generierte / interne Assets BLEIBEN ignoriert (auch wenn es Bilder sind)
+#    Die gehören in Track 2 (R2: refs.blackfox-marketing.de), nicht hierher.
+refs/**/*frames*/
+refs/**/*frames-v*/
+refs/**/beat*
+refs/**/*storyboard*
+refs/**/*moodboard*
+refs/**/*mood-board*
+refs/**/*draft*
+refs/**/*wip*
+refs/**/*.mp4
+refs/**/*.mov
+refs/**/*.gif
+
+# System
+.DS_Store
+*.tmp
